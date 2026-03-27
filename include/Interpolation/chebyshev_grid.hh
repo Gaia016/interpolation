@@ -21,6 +21,7 @@ struct StandardGrid {
     * (the number of points of the grid is p+1).
     */
    StandardGrid(size_t p = 3);
+   // The constructor is the only one without "const".
 
    /**
     * @brief Interpolate a view of a vector on the grid
@@ -105,6 +106,7 @@ struct StandardGrid {
     * @return vector_d The vector of discretized values
     */
    vector_d discretize(const std::function<double(double)> &fnc) const;
+   // "const" tells me the function does not modify the data of the struct.
 
    /**
     * @brief    Get the j-th grid point
@@ -119,7 +121,7 @@ struct StandardGrid {
 
    /// Degree of interpolating polynomial (# of points = N+1)
    size_t _p;
-   /// Grid nodes
+   /// Grid nodes. The "_" tells me "do not modify outside the struct".
    vector_d _tj;
    /// \f$ \beta_j \f$ values, see right below Eq. 2.5 of
    /// https://doi.org/10.48550/arXiv.2112.09703

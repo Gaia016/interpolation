@@ -20,6 +20,8 @@ struct StandardGrid {
       FBF   = 1,
       SBF   = 2,
    };
+   // "enum" assigns a name to a number, in this case the strategy to be used for interpolation. The "class" keyword makes it a scoped enum, so that the names are accessed with STRATEGY::NAME and do not pollute the global namespace.
+   // FBF first barycentric formula, SBF second barycentric formula
 
    /**
     * @brief Construct a new Standard Grid object from an input vector
@@ -54,6 +56,7 @@ struct StandardGrid {
     */
    double interpolate(double t, const vector_d &fj, size_t start, size_t end,
                       STRATEGY str = STRATEGY::FBF) const;
+                      //FBF is set as the default strategy cause generally it is the most stable for a generic grid
    /**
     * @brief Interpolate the derivative of a view of a vector on the grid
     *

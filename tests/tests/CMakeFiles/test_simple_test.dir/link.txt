@@ -1,0 +1,1 @@
+/usr/bin/c++ -O3 -DNDEBUG CMakeFiles/test_simple_test.dir/test_simple_test.cc.o -o test_simple_test  -Wl,-rpath,/home/gaia/CompMeth/interpolation/tests/lib -lm ../lib/libInterpolation.so 

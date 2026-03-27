@@ -1,4 +1,5 @@
 #include "Interpolation/chebyshev_grid.hh"
+#include <stdexcept>
 
 namespace Interpolation
 {
@@ -40,5 +41,138 @@ namespace Chebyshev
         }
 
     }
+
+    /*
+    double StandardGrid::poli_weight(double t, size_t j) const
+    {
+        double den = 0.;
+        for(int i=0; i< this->_betaj.size(); i++){
+            den += this->_betaj[i] / (t - this->_tj[i]);
+        }
+        
+        double b_i = den * this->_betaj[j] / (t - this->_tj[j]);
+        return b_i;
+    }
+    */
+
+/*
+  double StandardGrid::poli_weight(double t, size_t j, double den) const
+    {
+        double b_i = den * this->_betaj[j] / (t - this->_tj[j]);
+        return b_i;
+    }
+*/
+    double StandardGrid::interpolate(double t, const vector_d &fj, size_t start, size_t end) const
+    // the "&" means "pass by reference", i.e. do not copy the vector, just pass a reference
+    {
+        if(t<-1 | t > 1){
+            throw std::domain_error("StandardGrid::interpolate: t must be in [-1, 1]");
+        }
+        if(end - start != _p){
+            throw std::domain_error("StandardGrid::interpolate: end - start must be equal to p");
+        }
+        /*
+        double res = 0.;
+        for(size_t i = 0, i<=_p; i++){
+            res += poli_weight(t, i) * fj[i + start];
+        }
+        return res;
+        */
+
+        double den = 0.;
+        for(size_t j=0; j<= _p; j++){
+            den += _betaj[j] / (t - _tj[j]);
+        }
+        double res = 0.;
+        for(size_t i = 0;i<=_p; i++){
+            res += poli_weight(t, i, den) * fj[i + start];
+        }
+        return res;
+
+    }
+
+    double StandardGrid::poli_weight(double t, size_t j, double den) const
+    {
+        if (std::abs(t - _tj[j]) < 1e-15) 
+            // If t is very close to _tj[j], return the limit value of the weight, which is 1.
+            return 1.;
+            double res = 0.;
+            res = _betaj[j] / (t - _tj[j]) /den;
+            return res;
+    }
+
+    double StandardGrid::poli_weight(double t, size_t j) const
+    {
+       if (std::abs(t - _tj[j]) < 1e-15) 
+            // If t is very close to _tj[j], return the limit value of the weight, which is 1.
+            return 1.;
+        double den = 0.;
+        for(size_t j=0; j<= _p; j++){
+            if (std::abs(t - _tj[j]) < 1e-15) 
+                // If t is very close to _tj[j], return the limit value of the weight, which is 1.
+                return 0.;
+            den += _betaj[j] / (t - _tj[j]);
+        }
+        double res = 0.;
+        res = _betaj[j] / (t - _tj[j]) /den;
+        return res;
+    }
+
+    vector_d StandardGrid::discretize(const std::function<double(double)> &f) const
+    {
+        vector_d fj(_p+1, 0.);
+        for (size_t i=0; i<= _p;i++){
+            fj[i]=f(_tj[i]);
+        }
+        return fj;
+    }
+
+    double StandardGrid::poli_weight_der(double t, size_t j) const{
+
+        double l=0;
+        for(size_t i=0; i <= _p; i++){
+            l += poli_weight(t, i)*_Dij[i][j];
+        }
+        return l;
+    }
+
+    double StandardGrid::interpolate_der(double t, const vector_d &fj, size_t start, size_t end) const
+    {
+        if(t<-1 | t > 1){
+            throw std::domain_error("StandardGrid::interpolate: t must be in [-1, 1]");
+        }
+        if(end - start != _p){
+            throw std::domain_error("StandardGrid::interpolate: end - start must be equal to p");
+        }
+
+        double p = 0.;
+        for (size_t i= start, j=0; i<= end; i++, j++){
+            p+= fj[i] * poli_weight_der(t, j);
+
+        }
+        return p;
+
+    }
+
+    double StandardGrid::poli_weight_der(double t, size_t j, double den) const
+    {
+        double l=0;
+        for(size_t i=0; i <= _p; i++){
+            l += poli_weight(t, i, den)*_Dij[i][j];
+        }
+        return l;
+    }
+
+    void StandardGrid::apply_D(vector_d &fj, size_t start, size_t end) const
+    // Guarda la soluzione da Rodini
+    {
+        vector_d f_tilde = fj;
+        for(size_t j= start; j<= end; j++){
+            for (size_t i= start; i<= end; i++){
+                fj[i] += _Dij[j][i] * f_tilde[i];
+            } 
+    }
+
+
 } // namespace Cebyshev
 } // namespace Interpolation
