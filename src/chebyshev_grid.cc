@@ -166,13 +166,30 @@ namespace Chebyshev
     void StandardGrid::apply_D(vector_d &fj, size_t start, size_t end) const
     // Guarda la soluzione da Rodini
     {
+       if (end - start != _p) {
+      throw std::invalid_argument("[StandardGrid::apply_D]: cannot apply "
+                                  "derivative matrix to partial vector.");
+        }
+
         vector_d f_tilde = fj;
         for(size_t j= start; j<= end; j++){
             for (size_t i= start; i<= end; i++){
-                fj[i] += _Dij[j][i] * f_tilde[i];
+                fj[i] += f_tilde[i] *_Dij[j][i]  ;
             } 
-    }
+            }
+   } 
 
+   vector_d StandardGrid::discretize(const std::function<double(double)> &fnc) const
+{
+   vector_d fj(_p + 1, 0.);
+   vector_d result(_p + 1, 0.);
+   for (size_t i = 0; i <= _p; i++) {
+      fj[i] = fnc(_tj[i]);
+      result[i] = fnc(_tj[i]);
+   }
+   return fj;
+   return result;
+}
 
 } // namespace Cebyshev
 } // namespace Interpolation
